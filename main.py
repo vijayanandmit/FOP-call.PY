@@ -136,9 +136,10 @@ class EScall(EWrapper, EClient):
 
 
     def start(self):
+
         #define the contract
         contract = Contract()
-        contract.symbol = ticker
+        contract.symbol = "ES"
         contract.secType = "FOP"
         contract.exchange = "GLOBEX"
         contract.currency = "USD"
@@ -210,11 +211,11 @@ class SellEScall(EWrapper, EClient):
         self.done = True
         self.disconnect()
 
-ticker = "ES"
+
 action = "sell"
 putcall = "P"
-strike = 4340
-expr = "20210806"
+strike = 4600
+expr = "20210917"
 
 #execute the classes
 def main():
