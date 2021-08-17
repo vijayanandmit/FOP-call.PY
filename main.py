@@ -3,6 +3,9 @@ from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
 from ibapi.order import *
 from threading import Timer
+from datetime import datetime
+import pendulum
+#https://pendulum.eustace.io
 
 port = 7497  # Simulated + TWS
 #port = 4002 # Simulated + Gateway
@@ -98,8 +101,8 @@ class EScall(EWrapper, EClient):
         #place the order
         order = Order()
         order.action = action
-        contract.strike = strike
         contract.right = putcall
+        contract.strike = strike
         contract.lastTradeDateOrContractMonth = expr
         order.totalQuantity = 1
         order.orderType = "MKT"
@@ -161,10 +164,39 @@ class SellEScall(EWrapper, EClient):
         self.done = True
         self.disconnect()
 
+#   nextMonday = pendulum.now().next(pendulum.MONDAY)
+#   nextSunday = nextMonday.next(pendulum.SUNDAY)
+#   nextMonday = nextMonday.strftime('%d/%m/%Y')
+#   nextSunday = nextSunday.strftime('%d/%m/%Y')
+
+
+def nextFriday():
+    today = pendulum.now()
+    nextMonday = today.next(pendulum.MONDAY).strftime('%Y%m%d')
+    nextWedday = today.next(pendulum.WEDNESDAY).strftime('%Y%m%d')
+    nextFriday = today.next(pendulum.FRIDAY).strftime('%Y%m%d')
+    return nextFriday
+    
+def nextExpiry():
+    expiry = today = pendulum.now()
+#    if(today is Monday)
+#       expiry = Monday
+#   else(today is tues or Wednes)
+#       expiry = Wednesday
+#   else (today is thurs or friday)
+#       expiry = Friday
+    return expiry
+
+def validStrike():
+    sp = 4600
+    return sp
+
 action = "sell"
 putcall = "C"
-strike = 4600
-expr = "20210917"
+#1 Read current value of ES from yahoo or IB,
+#2 Ceil/Floor to +/-5 or +/-10 valid strike
+strike = validStrike()       #choose ATM
+expr = nextFriday()
 
 #execute the classes
 def main():
@@ -177,11 +209,13 @@ def main():
 #     app.run()
 
     #sell ATM call, next Expiry
-     app1 = EScall()
-     app1.nextOrderId = 0
-     app1.connect("127.0.0.1", port, 9)  # IB Gateway PaperTrading
-     Timer(3, app1.stop).start()
-     app1.run()
+#     app1 = EScall()
+#     app1.nextOrderId = 0
+#     app1.connect("127.0.0.1", port, 9)  # IB Gateway PaperTrading
+#     Timer(3, app1.stop).start()
+#     app1.run()
+
+    print(strike)
 
 if __name__ == "__main__":
     main()
