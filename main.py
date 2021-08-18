@@ -4,6 +4,8 @@ from ibapi.contract import Contract
 from ibapi.order import *
 from threading import Timer
 from datetime import datetime
+import yfinance as yf
+import pandas as pd
 import pendulum
 #https://pendulum.eustace.io
 
@@ -188,14 +190,34 @@ def nextExpiry():
     return expiry
 
 def validStrike():
-    sp = 4600
-    return sp
+    str_p = 4600
+    ticker = yf.Ticker('ES=F')
+    hist = ticker.history(period="3d", interval="5m")
+    # print(hist)
+
+    df_history = pd.DataFrame(hist)
+    # how to print df_history, on screen or to_csv()
+
+    # pull recent_value from hist
+    recent_value = df_history['Close'].iloc[-1]
+    print("recent", recent_value)
+
+    #currently find ATM strike by rounding off to closest multiple of 10, which is lower than stock price
+    #To do, find the valid strike ATM/ITM or OTM from the options chain
+    recent_rounded = recent_value - (recent_value%10)
+
+    return recent_rounded
+
+def OTMStrike():
+    return (validStrike() + 10)
 
 action = "sell"
 putcall = "C"
 #1 Read current value of ES from yahoo or IB,
 #2 Ceil/Floor to +/-5 or +/-10 valid strike
-strike = validStrike()       #choose ATM
+
+#strike = validStrike()       #choose ATM
+strike = OTMStrike()        #OTM (ATM + 10)
 expr = nextFriday()
 
 #execute the classes
@@ -209,13 +231,13 @@ def main():
 #     app.run()
 
     #sell ATM call, next Expiry
-#     app1 = EScall()
-#     app1.nextOrderId = 0
-#     app1.connect("127.0.0.1", port, 9)  # IB Gateway PaperTrading
-#     Timer(3, app1.stop).start()
-#     app1.run()
+    app1 = EScall()
+    app1.nextOrderId = 0
+    app1.connect("127.0.0.1", port, 9)  # IB Gateway PaperTrading
+    Timer(3, app1.stop).start()
+    app1.run()
 
-    print(strike)
+    print("ATM strike = ", strike )
 
 if __name__ == "__main__":
     main()

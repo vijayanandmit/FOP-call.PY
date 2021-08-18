@@ -14,15 +14,16 @@ start = timeit.default_timer()
 #https://aroussi.com/post/download-options-data
 
 #prompt for a symbol
-symbol = input('What is your stock ticker?:  ')
-min_delta = float(input('what is the minimum delta(e.g. 0.7 is 70%)?:   '))
-min_yield = float(input('what is the minimum weekly yield (e.g. .01 is 1%)?:   '))
-max_expiration = input('what is the latest expiration?(mm-dd-yyyy):   ')
+#symbol = input('What is your stock ticker?:  ')
+#min_delta = float(input('what is the minimum delta(e.g. 0.7 is 70%)?:   '))
+#min_yield = float(input('what is the minimum weekly yield (e.g. .01 is 1%)?:   '))
+#max_expiration = input('what is the latest expiration?(mm-dd-yyyy):   ')
 
 #hard-wire a symbol without the prompt
 
-#symbol = 'Tna'
-
+symbol = 'AAPL'
+min_delta = 70
+min_yield = 1
 #print symbol
 #print(symbol.upper())
 
@@ -57,13 +58,14 @@ ticker = yf.Ticker(symbol)
 #expiration = input('What is your expiration date? (yyyy-mm-dd):  ')
 #expiration = '2021-01-08'
 
-#exp_dates = []
+exp_dates = []
 exp_dates = ticker.options # this is the list of expiration dates
-#print(exp_dates)
+print(exp_dates)
+
 #opt = ticker.option_chain(expiration)
 #print(opt)
 
-#opt = ticker.option_chain(exp_dates)
+opt_spy = ticker.option_chain('2021-08-20')
 
 df = pd.DataFrame()
 for x in exp_dates:
@@ -75,9 +77,13 @@ for x in exp_dates:
 
 hist = ticker.history(period="3d", interval = "5m")
 #print(hist)
+
 df_history = pd.DataFrame(hist)
+#how to print df_history, on screen or to_csv()
+
+#pull recent_value from hist
 recent_value = df_history['Close'].iloc[-1]
-print(recent_value)
+print("recent", recent_value)
 
 df['recent_px'] = recent_value
 
@@ -177,28 +183,34 @@ df_two_colums.to_csv('two_columns.csv')
 #filters out for delta threshold
 
 find_delta = df_two_colums.loc[lambda df_two_columns: df_two_columns['delta_calc'] > min_delta, :]
-#print(find_delta)
+print(find_delta)
 #find_delta.to_csv('find_delta.csv')
 
 #filters out for expiration threshold
-find_delta_first_expiration = find_delta.loc[lambda find_delta: find_delta['converted_expiration'] <= max_expiration, :]
+#1 comment for max_expiration, for compilation
+# find_delta_first_expiration = find_delta.loc[lambda find_delta: find_delta['converted_expiration'] <= max_expiration, :]
 #print(find_delta_first_expiration)
 
 #filters out for yield threshold
 #find_delta_and_yield = find_delta_first_expiration.loc[lambda find_delta_first_expiration: find_delta_first_expiration['yield'] > .008, :]
 
-find_delta_and_yield = find_delta_first_expiration.loc[lambda find_delta_first_expiration: find_delta_first_expiration['weekly_yield'] > min_yield, :]
-# find_delta_and_yield = find_delta.loc[lambda find_delta: find_delta['yield'] > .04, :]
-print(find_delta_and_yield)
-find_delta_and_yield.to_csv('find_delta_and_yield.csv')
+#2 commented for compilation
+#find_delta_and_yield = find_delta_first_expiration.loc[lambda find_delta_first_expiration: find_delta_first_expiration['weekly_yield'] > min_yield, :]
 
+#3
+#find_delta_and_yield = find_delta.loc[lambda find_delta: find_delta['yield'] > .04, :]
+#print(find_delta_and_yield)
+#find_delta_and_yield.to_csv('find_delta_and_yield.csv')
+
+#4
 #chooses the strike with the max yield
 #max_value = find_delta_and_yield['yield'].max()
-max_value = find_delta_and_yield['weekly_yield'].max()
-print(max_value)
+#max_value = find_delta_and_yield['weekly_yield'].max()
+#print(max_value)
 
-find_final_strike = find_delta_and_yield.loc[lambda find_delta_and_yield: find_delta_and_yield['weekly_yield'] == max_value, :]
-print(find_final_strike)
+#5
+#find_final_strike = find_delta_and_yield.loc[lambda find_delta_and_yield: find_delta_and_yield['weekly_yield'] == max_value, :]
+#print(find_final_strike)
 
 stop = timeit.default_timer()
 
