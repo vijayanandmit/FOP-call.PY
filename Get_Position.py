@@ -5,8 +5,16 @@ from ibapi.order import *
 from threading import Timer
 import pandas as pd
 
+#port = 4001  # Live + Gateway
 port = 4002  #Simulated + Gateway
 #port = 7497 #Simulated TWS
+#port = 7496  # Live TWS
+
+#linkedAcc = ""     # single account
+linkedAcc = "U4306442"   #heloc
+#linkedAcc = "TFSA"   #TFSA
+
+
 #buy the stock
 class BuytheStock(EWrapper, EClient):
 
@@ -130,10 +138,15 @@ class TestApp(EWrapper, EClient):
                         marketPrice: float, marketValue: float,
                         averageCost: float, unrealizedPNL: float,
                         realizedPNL: float, accountName: str):
-        print("UpdatePortfolio.", "Symbol:", contract.symbol, "SecType:", contract.secType, "Exchange:",
-              contract.exchange,
-              "Position", position, 
-              "UnrealizedPNL:", unrealizedPNL)
+        if contract.secType == "FOP" or contract.secType == "OPT":
+            print( "Symbol:",contract.symbol, contract.strike, contract.right, "SecType:", contract.secType,
+              "Expiry:",contract.lastTradeDateOrContractMonth, "Position", position, "UnrealizedPNL:", unrealizedPNL)
+        elif contract.secType == "FUT":
+            print( "Symbol:",contract.symbol, "SecType:", contract.secType,
+              "Expiry:",contract.lastTradeDateOrContractMonth, "Position", position, "UnrealizedPNL:", unrealizedPNL)
+        else:
+            print( "Symbol:",contract.symbol, "SecType:", contract.secType,
+               "Position", position, "UnrealizedPNL:", unrealizedPNL)
 #, "RealizedPNL:", realizedPNL)
 #, "AccountName:", accountName)
 #, "MarketPrice:", marketPrice, "MarketValue:", marketValue, "AverageCost:",averageCost,
@@ -149,11 +162,11 @@ class TestApp(EWrapper, EClient):
         print("AccountDownloadEnd. Account:", accountName)
 
     def start(self):
-        self.reqAccountUpdates(True, "")
+        self.reqAccountUpdates(True, linkedAcc)
 
     def stop(self):
  #       print(pos)
-        self.reqAccountUpdates(False, "")
+        self.reqAccountUpdates(False, linkedAcc)
         self.done = True
         self.disconnect()
 

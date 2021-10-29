@@ -9,8 +9,8 @@ import pandas as pd
 import pendulum
 #https://pendulum.eustace.io
 
-port = 7497  # Simulated + TWS
-#port = 4002 # Simulated + Gateway
+#port = 7497  # Simulated + TWS
+port = 4002 # Simulated + Gateway
 
 #buy ES
 class buyES(EWrapper, EClient):
@@ -114,7 +114,7 @@ class EScall(EWrapper, EClient):
         self.done = True
         self.disconnect()
 
-class SellEScall(EWrapper, EClient):
+class SellNQcall(EWrapper, EClient):
 
     def __init__(self):
         EClient.__init__(self, self)
@@ -146,18 +146,18 @@ class SellEScall(EWrapper, EClient):
 
         #define the contract
         contract = Contract()
-        contract.symbol = "ES"
+        contract.symbol = "NQ"
         contract.secType = "FOP"
         contract.exchange = "GLOBEX"
         contract.currency = "USD"
-        contract.multiplier = "50"
+        contract.multiplier = "20" #20 for NQ, 50 for ES
 
         #place the order
         order = Order()
         order.action = "sell"
         contract.right = "C"
-        contract.strike = 4380
-        contract.lastTradeDateOrContractMonth = "20210813"
+        contract.strike = 14000
+        contract.lastTradeDateOrContractMonth = "20210917"
         order.totalQuantity = 1
         order.orderType = "MKT"
         self.placeOrder(self.nextOrderId, contract, order)
@@ -187,7 +187,7 @@ def nextExpiry():
 #       expiry = Wednesday
 #   else (today is thurs or friday)
 #       expiry = Friday
-    return expiry
+#    return expiry
 
 def validStrike():
     str_p = 4600
@@ -211,7 +211,7 @@ def validStrike():
 def OTMStrike():
     return (validStrike() + 10)
 
-action = "sell"
+action = "buy"
 putcall = "C"
 #1 Read current value of ES from yahoo or IB,
 #2 Ceil/Floor to +/-5 or +/-10 valid strike
@@ -232,6 +232,7 @@ def main():
 
     #sell ATM call, next Expiry
     app1 = EScall()
+#    app1 = SellNQcall()
     app1.nextOrderId = 0
     app1.connect("127.0.0.1", port, 9)  # IB Gateway PaperTrading
     Timer(3, app1.stop).start()
