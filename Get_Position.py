@@ -4,6 +4,7 @@ from ibapi.contract import Contract
 from ibapi.order import *
 from threading import Timer
 import pandas as pd
+import sys
 
 #port = 4001  # Live + Gateway
 port = 4002  #Simulated + Gateway
@@ -194,4 +195,7 @@ def main():
 
 
 if __name__ == "__main__":
+    print(f"Arguments count: {len(sys.argv)}")
+    for i, arg in enumerate(sys.argv):
+        port = int(sys.argv[1])
     main()
