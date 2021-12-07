@@ -4,9 +4,17 @@ from ibapi.contract import Contract
 from ibapi.order import *
 from threading import Timer
 import pandas as pd
+import sys
 
+#port = 4001  # Live + Gateway
 #port = 4002  #Simulated + Gateway
-port = 7497 #Simulated TWS
+#port = 7497 #Simulated TWS
+#port = 7496  # Live TWS
+
+#linkedAcc = ""     # single account
+linkedAcc = "U4306442"   #heloc
+#linkedAcc = "TFSA"   #TFSA
+
 
 #buy the stock
 class BuytheStock(EWrapper, EClient):
@@ -124,17 +132,26 @@ class TestApp(EWrapper, EClient):
 
     def updateAccountValue(self, key: str, val: str, currency: str, accountName: str):
 #prints too many info
-#        print("UpdateAccountValue. Key:", key, "Value:", val, "Currency:", currency, "AccountName:", accountName)
-         return
+        if key == "AvailableFunds" or key == "BuyingPower" or key == "CashBalance" or key == "Cushion":
+            print(key, val, currency, "AccountName:", accountName)
+        elif key == "EquityWithLoanValue" or key == "UnrealizedPnL" or key == "TotalCashBalance":
+            print(key, val, currency, "AccountName:", accountName)
+        else:
+            return
 
     def updatePortfolio(self, contract: Contract, position: float,
                         marketPrice: float, marketValue: float,
                         averageCost: float, unrealizedPNL: float,
                         realizedPNL: float, accountName: str):
-        print("UpdatePortfolio.", "Symbol:", contract.symbol, "SecType:", contract.secType, "Exchange:",
-              contract.exchange,
-              "Position", position, 
-              "UnrealizedPNL:", unrealizedPNL)
+        if contract.secType == "FOP" or contract.secType == "OPT":
+            print( "Symbol:",contract.symbol, contract.strike, contract.right, "SecType:", contract.secType,
+              "Expiry:",contract.lastTradeDateOrContractMonth, "Position", position, "UnrealizedPNL:", unrealizedPNL)
+        elif contract.secType == "FUT":
+            print( "Symbol:",contract.symbol, "SecType:", contract.secType,
+              "Expiry:",contract.lastTradeDateOrContractMonth, "Position", position, "UnrealizedPNL:", unrealizedPNL)
+        else:
+            print( "Symbol:",contract.symbol, "SecType:", contract.secType,
+               "Position", position, "UnrealizedPNL:", unrealizedPNL)
 #, "RealizedPNL:", realizedPNL)
 #, "AccountName:", accountName)
 #, "MarketPrice:", marketPrice, "MarketValue:", marketValue, "AverageCost:",averageCost,
@@ -150,11 +167,11 @@ class TestApp(EWrapper, EClient):
         print("AccountDownloadEnd. Account:", accountName)
 
     def start(self):
-        self.reqAccountUpdates(True, "")
+        self.reqAccountUpdates(True, linkedAcc)
 
     def stop(self):
  #       print(pos)
-        self.reqAccountUpdates(False, "")
+        self.reqAccountUpdates(False, linkedAcc)
         self.done = True
         self.disconnect()
 
@@ -182,4 +199,7 @@ def main():
 
 
 if __name__ == "__main__":
+    print(f"Arguments count: {len(sys.argv)}")
+    for i, arg in enumerate(sys.argv):
+        port = int(sys.argv[1])
     main()
