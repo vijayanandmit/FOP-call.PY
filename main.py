@@ -12,6 +12,12 @@ import pendulum
 port = 7497  # Simulated + TWS
 #port = 4002 # Simulated + Gateway
 
+ETF = Contract()
+ETF.symbol = 'QQQ'
+ETF.secType = 'STK'
+ETF.exchange = 'GLOBEX'
+ETF.currency = 'USD'
+
 #buy ES
 class buyES(EWrapper, EClient):
 
@@ -217,7 +223,7 @@ putcall = "C"
 #2 Ceil/Floor to +/-5 or +/-10 valid strike
 
 #strike = validStrike()       #choose ATM
-strike = OTMStrike()        #OTM (ATM + 10)
+strike = validStrike()        #OTM (ATM + 10)
 expr = nextFriday()
 
 #execute the classes

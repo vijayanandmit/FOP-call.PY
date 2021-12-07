@@ -5,8 +5,9 @@ from ibapi.order import *
 from threading import Timer
 import pandas as pd
 
-port = 4002  #Simulated + Gateway
-#port = 7497 #Simulated TWS
+#port = 4002  #Simulated + Gateway
+port = 7497 #Simulated TWS
+
 #buy the stock
 class BuytheStock(EWrapper, EClient):
 
